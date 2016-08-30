@@ -7,6 +7,8 @@
  * 
  * This object is responsible for drawing the story verses to the screen
  * and managing the user's choices of story direction, e.g.
+ *
+ * This object determines whic sprites will be drawn to the screen that coorespond to the users current state.
  */
  
 // String*String*String[] .

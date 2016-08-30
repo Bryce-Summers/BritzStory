@@ -11,11 +11,12 @@
   * 3. Embed each of the images with the proper coordinates.
   * 4. Create a system for optimizing the image loading operations.
   *    - I should probably load them asynchronously or use a loading bar.
+  *    - Partially acomplished with asynchronous background loading.
   * 5. Create a system for exporting PDFS.
   * 6. Investigate ways of hiding the image files.
   */
 
-var scene;
+var Global = {};
 
 var room_w;
 var room_h;
@@ -23,44 +24,49 @@ var text_x;
 var text_y;
 
 // pages : Page[];
-var pages;
+Global.pages;
 // int, an index into the pages array.
-var current_page;
+Global.current_page;
 
 // p5Image[].
-var backgrounds;
-var sprites;
+Global.backgrounds;
+Global.background_file_names;
+Global.sprites;
 
 // Story[].
 // These are objects that represent the story.
-var story;
+Global.story;
 
-var button_next;
-var button_prev;
+Global.left_button;
+Global.right_button;
 
 // Proload all of the images.
 function preload()
 {
-	backgrounds = [];
+	Global.backgrounds = [];
 	//debugger;
 	// FIXME : Make the 0th index a title page.
-	var background_file_names = ["B", "C", "D", "E", "G", "H", "J", "K"];
+	Global.background_file_names = ["B", "C", "D", "E", "G", "H", "J", "K"];
 	
 		
-	var len = background_file_names.length;
-		
-	for(var i = 0; i < len; i++)
+	var len = Global.background_file_names.length;
+
+	Global.backgrounds.push(loadImage("images/" + Global.background_file_names[0] + ".png"));
+	for(var i = 1; i < len; i++)
 	{
-		backgrounds.push(loadImage("images/" + background_file_names[i] + ".png"));
+		// backgrounds.push(loadImage("images/" + background_file_names[i] + ".png"));
+		// Temporarily fill all of the background images with the initial.
+		Global.backgrounds.push(Global.backgrounds[0]);
 	}
+	
 		
 	// -- Populate the story data.
-	story = [];   // An array of story passage partial verse prefix.
-	options = []; // An array holding the user options for each verse.
+	Global.story   = []; // An array of story passage partial verse prefix.
+	Global.options = []; // An array holding the user options for each verse.
 	
 	// Here we alias each of the variables for the sake of saving some space.
-	var o = options;
-	var s = story;
+	var o = Global.options;
+	var s = Global.story;
 	
 	// The story comes from the "Imaginative Concepts description by Path Britz.
 	// The title
@@ -144,21 +150,23 @@ function preload()
 }
 
 function setup() {
-	
-	room_w = (window.innerWidth  - 1);
-	
-	// This is the scaling factor that all images will be put through 
-	// before they are drawn to the screen.
-	// The magic number cooresponds to the width of the uniformly 
-	// sized background images.
-	scale = (room_w/2)/2816.0;
-	
-	// We need enough space for the background image and the choice text.
-	room_h = (window.innerHeight - 1)*2;
 
-	unit = 64;
+	// Asynchrously load the remainder of the images.	
+	var len = Global.background_file_names.length;
+	for(var i = 1; i < len; i++)
+	{
+		// Make sure we have proper references to the index value.
+		var scope = function(index)
+		{
+			loadImage("images/" + Global.background_file_names[index] + ".png", function(img)
+			{
+				Global.backgrounds[index] = img;
+			});
+		};
+		scope(i);
+	}
 
-	createCanvas(room_w, room_h);
+	resize(true);
   
 	createPages();
  	
@@ -167,25 +175,71 @@ function setup() {
 	//noLoop();
 	
 	var button_w = 64;
-	left_button  = new gui_Button(getBackgroundXLocation() - button_w, 0, button_w, getScaledBackgroundH());
-	right_button = new gui_Button(getBackgroundXLocation() + getScaledBackgroundW(), 0, button_w, getScaledBackgroundH());
+	Global.button_w = button_w;
+	Global.left_button  = new gui_Button(getBackgroundXLocation() - button_w, 0, button_w, getScaledBackgroundH());
+	Global.right_button = new gui_Button(getBackgroundXLocation() + getScaledBackgroundW(), 0, button_w, getScaledBackgroundH());
 	
-	left_button.setMouseAction(prevPage);
-	right_button.setMouseAction(nextPage);
+	Global.left_button.setMouseAction(prevPage);
+	Global.right_button.setMouseAction(nextPage);
 	
-	left_button.message  = "<";
-	right_button.message = ">";
+	Global.left_button.message  = "<";
+	Global.right_button.message = ">";
+}
+
+function windowResized()
+{
+  resize(false);
+}
+
+function resize(first_time)
+{
+	room_w = (window.innerWidth  - 1);
+
+	// This is the scaling factor that all images will be put through 
+	// before they are drawn to the screen.
+	// The magic number cooresponds to the width of the uniformly 
+	// sized background images.
+	Global.scale = (room_w/2)/2816.0;
+
+	// We need enough space for the background image and the choice text.
+	room_h = (window.innerHeight - 1);
+
+	Global.unit = 64;
+
+	if(first_time)
+	{
+		createCanvas(room_w, room_h);
+	}
+	else
+	{
+		resizeCanvas(room_w, room_h);
+
+		var button_w = Global.button_w;
+
+		Global.left_button.resize(getBackgroundXLocation() - button_w, 0, button_w, getScaledBackgroundH());
+		Global.right_button.resize(getBackgroundXLocation() + getScaledBackgroundW(), 0, button_w, getScaledBackgroundH());
+
+		// Resize all of the pages.
+		for(var i = 0; i < Global.pages.length; i++)
+		{
+			var page = Global.pages[i];
+			page.resize(room_w, room_h);
+		}
+	}
+
+	// Clear the screen for good measure.
+	clear();
 }
 
 function createPages()
 {
-	pages = [];
-	current_page = 0;
+	Global.pages = [];
+	Global.current_page = 0;
 	
-	var len = backgrounds.length;
+	var len = Global.backgrounds.length;
 	for(var i = 0; i < len; i++)
 	{
-		pages.push(createPage(i));
+		Global.pages.push(createPage(i));
 	}
 }
 
@@ -195,13 +249,9 @@ function createPage(index)
 {
 	var sprites = [];
 	
-	// Populate the given sprites that might be displayed over the images.
-	/*
-	var spr = new Sprite(rectImage(20, 20, 255, 0, 0), 50, 50);
-	sprites.push(spr);
-	*/
+	var story = new Story();
 	
-	return new Page(backgrounds[index], sprites);
+	return new Page(index, sprites, story);
 }
 
 // Returns a monochromatic p5JS image of the given dimensions.
@@ -223,24 +273,24 @@ function rectImage(w, h, r, g, b)
 // void root of the drawing system.
 function draw()
 {
-	pages[current_page].draw();
+	Global.pages[Global.current_page].draw();
 	
-	left_button.update();
-	right_button.update();
+	Global.left_button.update();
+	Global.right_button.update();
 	
-	left_button.draw();
-	right_button.draw();
+	Global.left_button.draw();
+	Global.right_button.draw();
 }
 
 // Root of the keyPressed system.
 function keyPressed()
 {
-	if (keyCode === RIGHT_ARROW)
+	if (keyCode === Global.RIGHT_ARROW)
 	{
 		nextPage();
 	}
 	
-	if (keyCode === LEFT_ARROW)
+	if (keyCode === Global.LEFT_ARROW)
 	{
 		prevPage();
 	}
@@ -251,46 +301,46 @@ function keyPressed()
 function nextPage()
 {
 	
-	current_page = (current_page + 1) % pages.length;
-	console.log("Going to next page: " + current_page);
+	Global.current_page = (Global.current_page + 1) % Global.pages.length;
+	console.log("Going to next page: " + Global.current_page);
 	redraw();
 }
 
 function prevPage()
 {
-	current_page = (current_page + pages.length - 1) % pages.length;
-	console.log("Going to previous page: " + current_page);
+	Global.current_page = (Global.current_page + Global.pages.length - 1) % Global.pages.length;
+	console.log("Going to previous page: " + Global.current_page);
 	redraw();
 }
 
 // Mouse pressed and released triggers for my gui buttons.
 function mousePressed()
 {
-	pages[current_page].mouseP();
-	left_button.mousePressed();
-	right_button.mousePressed();
+	Global.pages[Global.current_page].mouseP();
+	Global.left_button.mousePressed();
+	Global.right_button.mousePressed();
 }
 
 function mouseReleased()
 {
-	pages[current_page].mouseR();
-	left_button.mouseReleased();
-	right_button.mouseReleased();	
+	Global.pages[Global.current_page].mouseR();
+	Global.left_button.mouseReleased();
+	Global.right_button.mouseReleased();	
 }
 
 function mouseMoved()
 {
-	pages[current_page].mouseM();
+	Global.pages[Global.current_page].mouseM();
 }
 
 function getScaledBackgroundH()
 {
-	return backgrounds[0].height*scale;
+	return Global.backgrounds[0].height*Global.scale;
 }
 	
 function getScaledBackgroundW()
 {
-	return backgrounds[0].width*scale;
+	return Global.backgrounds[0].width*Global.scale;
 }
 
 function getBackgroundXLocation()

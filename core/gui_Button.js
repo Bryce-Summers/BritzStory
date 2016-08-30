@@ -12,13 +12,8 @@ buttonReleased = false;
  // Constructor.
 function gui_Button(x, y, w, h)
 {
-	this.x = x;
-	this.y = y;
-	this.w = w;
-	this.h = h;
-	this.x2 = this.x + w;
-	this.y2 = this.y + h;
-	
+	this.resize(x, y, w, h);
+
 	this.action = null;
 	this.text_size = 20;
 	this.message = "";
@@ -66,6 +61,16 @@ gui_Button.prototype =
 		
 		// Draw the overlay.
 		rect(this.x, this.y, this.w, this.h);
+	},
+
+	resize(x, y, w, h)
+	{
+		this.x = x;
+		this.y = y;
+		this.w = w;
+		this.h = h;
+		this.x2 = this.x + w;
+		this.y2 = this.y + h;
 	},
 	
 	draw2()
@@ -118,5 +123,5 @@ gui_Button.prototype =
 	dead()
 	{
 		return !this.alive;
-	}	
+	},
 }
