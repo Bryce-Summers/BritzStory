@@ -10,7 +10,7 @@ $Thank you to the following user testers:
 
 This section has been deliberatly left blank.
 
-[Try out the book online here.](http://username.github.io/BritzStory)
+[Try out the book online here.](http://Bryce-Summers.github.io/BritzStory)
 
 #Features that are working:
  - The book structure is in place, such as there being a title page, a forward page, a table of contents with working buttons,
