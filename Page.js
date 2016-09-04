@@ -616,6 +616,9 @@ Page.prototype =
 	// background : Sprite.
 	changeBackgroundImage(background_sprite)
 	{
+		console.log("Changed Background Image to ");
+		console.log(background_sprite);
+
 		this._background = background_sprite;
 	},
 

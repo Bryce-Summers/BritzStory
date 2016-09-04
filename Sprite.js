@@ -20,5 +20,10 @@ Sprite.prototype =
 	draw()
 	{
 		image(this.image, this.x, this.y);
-	}
+	},
+
+    setName(name)
+    {
+        this.name = name;
+    }
 }
