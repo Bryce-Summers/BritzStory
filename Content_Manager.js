@@ -104,7 +104,7 @@
             {
                 return new Sprite(this.not_found_background, x, y);
             }
-            
+
             return new Sprite(this.not_found_sprite, x, y);
         }
 
@@ -113,8 +113,9 @@
 
         if(!sprite)
         {
-            var default_image = this.not_foundbackground != null ? this.not_found_background.image : null;
+            var default_image = this.not_found_background != null ? this.not_found_background.image : null;
             sprite = new Sprite(default_image, x, y);
+            sprite.setName(name);
             this.sprites[name] = sprite;
 
             var THIS = this;
@@ -122,41 +123,32 @@
             var scope = function(name_src, sprite_dest, isBackground)
             {
 
-                try{
-                    loadImage("images/" + name_src + ".png",
+                console.log("Attempting to load image " + name_src);
+                
+                loadImage("images/" + name_src + ".png",
 
-                        // Success callback.
-                        function(img)
-                        {
-                            THIS.sprites[name_src].image = img;
-                            console.log(name_src);
-                        },
+                    // Success callback.
+                    function(img)
+                    {
+                        THIS.sprites[name_src].image = img;
+                        console.log("Loaded Image: " + name_src);
+                    }//,
 
-                        // Failure callback.
-                        function(img)
+                    // Failure callback.
+                    /*
+                    function(img)
+                    {
+                        if(isBackground)
                         {
-                            if(isBackground)
-                            {
-                                sprite_dest.image = this.not_found_background;
-                            }
-                            else
-                            {
-                                sprite_dest.image = this.not_found_sprite = null;
-                            }
+                            sprite_dest.image = THIS.not_found_background.image;
                         }
-                    );
-                }
-                catch(err)
-                {
-                    if(isBackground)
-                    {
-                        sprite_dest.image = this.not_found_background;
-                    }
-                    else
-                    {
-                        sprite_dest.image = this.not_found_sprite = null;
-                    }
-                }
+                        else
+                        {
+                            sprite_dest.image = THIS.not_found_sprite.image;
+                        }
+                    }*/
+                );
+                
             };
             scope(name, sprite, isBackground);
         }
@@ -177,36 +169,36 @@
         var title = "The I don't think so story of Goldilocks and the three bears";
         var alternate_title = "Fairy Tales Can Come True";
         
-        // Page 1.
+        // Page 0.
         s.push(["Once upon a time, there was a girl named"]);
         o.push(["Goldilocks", "Bluebrightlyeyes", "Purpledimples", "Greengiggleysticks"]);// 1.
         
-        // Page 2.
+        // Page 1.
         s.push(["She woke up one morning and put on her"])
         o.push(["doodle dress", "jazzy jeans and floppy t-shirt", "princess gown", "space suit"]);// 2.
         
-        // Page 3.
+        // Page 2.
         s.push(["Then, she went for a walk"])
         o.push(["in the Stamperdamper woods", "on a street in Dippytown", "on Puddleduddle beach", "in the Dillysilly orchard"]);
         
-        // Page 4.
+        // Page 3.
         s.push(["She walked by"]);
         o.push(["dancing daisies", "jumping jack o-lanterns", "twinkling trees", "bouncing bikes"]);
         
-        // Page 5.
+        // Page 4.
         s.push(["She stopped to play with"]);
         o.push(["skipping snakes", "biking bees", "munching monkeys", "kissing kangaroos"]);
         
-        // Page 6.
+        // Page 5.
         s.push(["Very soon, she became hungry so she stopped at the"]);
         o.push(["house of the 3 bears", "castle of the fairy princesses", "cottage of the dwarfs", "palace of the King and Queen"]);
         
-        // Page 7.
+        // Page 6.
         // NOTE: This choice represents the evaluation of "*".
         s.push(["No one was there so she went inside to look around when she saw on a table"]);
         o.push(["3 bowls of lumpywumpy porridge", "3 dishes of tootsie wootsie sauce", "3 plates of cherry berry pudding", "3 cups of scoop loop yogurt"]);
         
-        // Page 8.
+        // Page 7.
         s.push(["She decided to try the biggest", "*", "but it was too"]);
         // FIXME : Integrate context sensitive labels.
         // FIXME : Use the previous choice from page 7...
@@ -214,39 +206,39 @@
         
         // Story: but it was too hot.
         
-        // Page 9.
+        // Page 8.
         s.push(["She then tried the middle-size", "*", "but it was too"]);
         o.push(["cold", "sticky", "smelly", "sour"]);
         
-        // Page 10.
+        // Page 9.
         s.push(["The third ", "*", "was just right and she ate it all up"]);
         // NOTE: There are no options for this page.
         o.push([]);
         
-        // Page 11.
+        // Page 10.
         s.push(["Then, she saw some stuffed animals to play with. She really liked the"]);
         o.push(["orange crocodile with pink feathers", "blue monkey with gold wings", "green dog with white horns", "zebra with a red tail"]);
         
-        // Page 12.
+        // Page 11.
         s.push(["After awhile, she became very sleepy and decided to lie down for a nap. She quickly fell asleep and had a wonderful dream about"]);
         o.push(["dancing with butterflies", "swimming with a school of fishes", "floating on clouds with birds", "swinging with monkeys"]);
         
-        // Page 13.
+        // Page 12.
         s.push(["When she woke up, she saw the"]);
         // NOTE: I believe that these might be dependant on some earlier choices.
         o.push(["bears back from the woods", "dwarfs playing cards", "the King and Queen dancing", "the fairy princesses stiring up a magic brew for her"]);
         
-        // Page 14.
+        // Page 13.
         s.push(["They she said"]);
         // NOTE: In my verse parsing code, I will need to special case lines
         //  that end in a quotation to avoid automatically inserting a period at the end.
         o.push(["\"Welcome to our home.\"", "\"Get out of our house and never come back.\"", "\"Would you like to stay and play with us?\"", "\"You better go home because your parents may be looking for you.\""]);
         
-        // Page 15.
+        // Page 14.
         s.push(["After awhile, she left"]);
         o.push(["on a magic carpet", "in a flying machine", "on the back of a unicorn", "in a batmobile"]);
         
-        // Page 16.
+        // Page 15.
         // NOTE: "[]" indicates to use the option text inline, instead of as a suffix.
         s.push(["Then, she was ready to", "[]", "and have a wonderful rest of the day."]);
         o.push(["go home", "go to school", "play with her friends at the playground", "go to the park"]);
@@ -258,52 +250,55 @@
         // A list of [background[]] specifications.
         var I = this._backgroundNames;
 
-        // Page 1.
+        // Page 0.
         I.push(null);
 
-        // Page 2.
+        // Page 1.
         I.push(["A"]);
 
-        // Page 3.
+        // Page 2.
         I.push(["B", "C", "D", "E"]);
 
-        // Page 4. // C --> F for a second Dippytown Street Image.
+        // Page 3. // C --> F for a second Dippytown Street Image.
+        I.push(["B", "F", "D", "E"]);
+
+        // Page 4.
+        // Depends on Page 3.
         I.push(["B", "F", "D", "E"]);
 
         // Page 5.
-        I.push(["B", "F", "D", "E"]);
-
-        // Page 6.
+        // House exteriors.
         I.push(["G", "H", "J", "K"]);
 
-        // Page 7.
+        // Page 6.
+        // House interiors. (Depends on Page 5.)
         I.push(["L", "M", "N", "P"]);
 
-        // Page 8. These will need to be spcial cased based on their length for Page 8.
+        // Page 7. These will need to be spcial cased based on their length for Page 8.
         I.push(["Q", "R", "S", "T", "U", "V", "W", "X"]);
 
-        // Page 9.
+        // Page 8.
         I.push(["Q", "R", "S", "T", "Z", "AA", "BB", "CC"]);
 
-        // Page 10.
+        // Page 9.
         I.push(["DD", "DD1", "DD2", "DD3"]);
 
-        // Page 11.
+        // Page 10.
         I.push(["EE", "FF", "GG", "HH"]);
 
-        // Page 12. Notice that their is a special 5th case here.
+        // Page 11. Notice that their is a special 5th case here.
         I.push(["EE", "FF", "GG", "HH", "JJ"]);
+
+        // Page 12.
+        I.push(["L", "M", "N", "P"]);
 
         // Page 13.
         I.push(["L", "M", "N", "P"]);
 
         // Page 14.
-        I.push(["L", "M", "N", "P"]);
-
-        // Page 15.
         I.push(["G", "H", "J", "K"]);
 
-        // Page 16.
+        // Page 15.
         I.push(["KK", "LL", "MM", "NN"]);
 
     },

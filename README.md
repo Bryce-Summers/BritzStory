@@ -6,7 +6,7 @@ Author: Pat Britz.
 Illustrator: Ken Britz.
 Software Development and Visual Design: Bryce Summers
 
-$Thank you to the following user testers:
+#Thank you to the following user testers:
 
 This section has been deliberatly left blank.
 
@@ -26,3 +26,7 @@ This section has been deliberatly left blank.
  - Exporting to PDF Documents.
  - Better User experiences, such as being able to drag pages and see pages flip, rather than the current slide show like effect.
  - A sophisticated review of the font choices and sizes. 
+ - The Title page needs to be revamped with paragraph native line breaks.
+ - Some of the longer option texts overflow the option buttons horizontally, which is a bug.
+ - All of the objects and background need to be better integrated.
+ - I need to finish logically associating choices to collections of background and object names.

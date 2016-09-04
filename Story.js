@@ -427,8 +427,6 @@ Story.prototype =
 
 	changeImages(page, index)
 	{
-		// FIXME: Remove this, it is just here for a stable build.
-		return;
 
 		// -- Change the background to an appropriate image.
 		var backgrounds = this.content_manager.getBackgrounds(index);
@@ -440,8 +438,54 @@ Story.prototype =
 		}
 
 		var choice_index = this.choices[index];
+		
+		// Here we associate logic with each of the pages.
+		switch(this.current_page_index)
+		{
+			case 0: break; // Character Selection.
+			case 1: choice_index = 0; // Constant Background.
+				break;
+			case 3: choice_index = this.choices[2];
+				break;
+			case 4: choice_index = this.choices[2];
+				break;
+
+			case 5: break; // Bear's, troll's etc house choice.
+
+			case 6: choice_index = this.choices[5];
+				break;
+			// FIXME: Add special casing logic here.
+			case 7:
+				break;
+			case 8:
+				break;
+			// Picture of character smiling, based on character chosen.
+			case 9: choice_index = this.choices[0];
+				break;
+
+			case 10: choice_index = this.choices[5];
+				break;
+
+			case 11: choice_index = this.choices[5];
+				break;
+
+			case 12: choice_index = this.choices[5];
+				break;
+
+			case 13: choice_index = this.choices[5];
+				break;
+
+			case 14: choice_index = this.choices[5];
+				break;
+		}
 
 		var background_name = backgrounds[choice_index];
+
+		if(!background_name)
+		{
+			console.log("Invalid Background Logic for page " + index);
+			debugger;
+		}
 
 		var sprite = this.content_manager.getSprite(background_name, 0, 0);
 
