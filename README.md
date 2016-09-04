@@ -6,7 +6,7 @@ Author: Pat Britz.
 Illustrator: Ken Britz.
 Software Development and Visual Design: Bryce Summers
 
-$Thank you to the following user testers:
+#Thank you to the following user testers:
 
 This section has been deliberatly left blank.
 
