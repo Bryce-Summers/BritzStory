@@ -19,47 +19,78 @@
 
 // FIXME: find an ultimate solution to these variables.
 var content;
-var page;
+var story;
 
-// Proload all of the images.
+
+
+// Preload all of the images.
 function preload()
 {
 	content = new Content_Manager();
 	content.preloadContent();	
+	loadFont("fonts/DancingScript-Regular.ttf", function(font)
+	{
+		STYLE.STORY_FONT = font;
+		// FIXME: Pick a better font for the title.
+		STYLE.TITLE_FONT = font;
+	});
+	
+	loadFont("fonts/OpenSans-Regular.ttf", function(font)
+	{
+		STYLE.NORMAL_FONT = font;
+	});
 }
+
 
 function setup() {
 
-	var page  = new Page(content);
+	var w = window.innerWidth;
+	var h = window.innerHeight;
+	createCanvas(w, h);
+
+	story = new Story(content);
 
 	// We save a lot of processing power by only
 	// redrawing when a change occurs on the screen.
-	// noLoop();	
+	// noLoop();
+
+	console.log(story);
 
 }
 
+
 function windowResized()
 {
-  page.resize(false);
+	var page = story.getCurrentPage();
+  	page.resize();
+  	var dim = page.getDimensions();
+	resizeCanvas(dim.width, dim.height);
 }
 
 // void root of the drawing system.
 function draw()
 {
+	var page = story.getCurrentPage();
+
+	if(!page.isCorrectSize())
+	{
+		windowResized();
+	}
+
 	page.draw();
 }
 
 // Root of the keyPressed system.
 function keyPressed()
 {
-	if (keyCode === Global.RIGHT_ARROW)
+	if (keyCode === RIGHT_ARROW)
 	{
-		page.nextPage();
+		story.nextPage();
 	}
 	
-	if (keyCode === Global.LEFT_ARROW)
+	if (keyCode === LEFT_ARROW)
 	{
-		page.prevPage();
+		story.prevPage();
 	}
   
 	redraw();
@@ -69,15 +100,18 @@ function keyPressed()
 // Mouse pressed and released triggers for my gui buttons.
 function mousePressed()
 {
+	var page = story.getCurrentPage();
 	page.mouseP();
 }
 
 function mouseReleased()
 {
+	var page = story.getCurrentPage();
 	page.mouseR();
 }
 
 function mouseMoved()
 {
+	var page = story.getCurrentPage();
 	page.mouseM();
 }

@@ -10,85 +10,442 @@
  *
  * This object determines which sprites will be drawn to the screen that coorespond to the users current state.
  */
- 
-function Story(content_manager, page)
+
+// Assumes that the content_manager is fully constructed. 
+function Story(content_manager)
 {
 	this.content_manager = content_manager;
-	this.page = page;
+
+	this.FRONT_PAGE_INDEX        = -3;
+	this.FORWARD_PAGE_INDEX      = -2;
+	this.TABLE_OF_CONTENTS_INDEX = -1;
+
+	this.current_page_index = this.FRONT_PAGE_INDEX;
+	this.numPages           = this.content_manager.numPages(); // 1 for final contents page.
+
+	this.min_page_index = -3;
+	this.max_page_index = this.numPages;
+
+	this.story_first_index = 0;
+	this.story_last_index  = this.numPages - 1;
+
+	// -- Setup all of the pages.
+
+	this.front_page        = new Page(content_manager);
+	this.setupTitlePage(this.front_page);
+
+	this.forward_page      = new Page(content_manager);
+	this.setupForwardPage(this.forward_page);
+
+	this.contents_page     = new Page(content_manager);
+	this.setupContentsPage(this.contents_page);
+
 
 	this.choices = [];
+	this.allocateDefaultChoices();
 
-	this.current_page = 0;
-	this.numPages = ???;
+	// Special option that gets displayed to the screen on more than one page.
+	this.STAR_INDEX = 6;
 
+	// Instantiate the first page.
+	this.page = new Page(content_manager);
+
+	// Then populate the story page with content.
+	this.setupStoryPage(this.page, 0);
+	this.page.resize();
 }
 
 Story.prototype =
 {
+
+	setupTitlePage(page)
+	{
+		// Create the Title Paragraph in centered font on the title page.
+		var fragment = [new Text_Fragment(this.content_manager.getBookTitle(), STYLE.PROSE_CONSTANT)];
+		var paragraph = new Paragraph(
+			{text_fragments: fragment,
+			 text_size:      STYLE.TITLE_SIZE,
+			 font:           STYLE.TITLE_FONT,
+			 dim:            {x: .5, y:0, w:.5,h:.33,},
+			 indent:         false,
+			 padding:        0,
+			 align: {v:CENTER, h:CENTER}
+			});
+		page.addParagraph(paragraph);
+
+		// Author.
+		var fragment = [new Text_Fragment("Author: Pat Britz", STYLE.PROSE_CONSTANT)];
+		var paragraph = new Paragraph(
+			{text_fragments: fragment,
+			 text_size:      STYLE.NORMAL_SIZE,
+			 font:           STYLE.NORMAL_FONT,
+			 dim:            {x: .5, y:.33, w:.5,h:.22,},
+			 indent:         false,
+			 padding:        16,
+			 align: {v:CENTER, h:CENTER}
+			});
+		page.addParagraph(paragraph);
+
+		// Illustrator.
+		var fragment = [new Text_Fragment("Illustrations: Ken Britz", STYLE.PROSE_CONSTANT)];
+		var paragraph = new Paragraph(
+			{text_fragments: fragment,
+			 text_size:      STYLE.NORMAL_SIZE,
+			 font:           STYLE.NORMAL_FONT,
+			 dim:            {x: .5, y:.55, w:.5,h:.22,},
+			 indent:         false,
+			 padding:        16,
+			 align: {v:CENTER, h:CENTER}
+			});
+		page.addParagraph(paragraph);
+
+		// Code and Design.
+		var fragment = [new Text_Fragment("Code and Design: Bryce Summers", STYLE.PROSE_CONSTANT)];
+		var paragraph = new Paragraph(
+			{text_fragments: fragment,
+			 text_size:      STYLE.NORMAL_SIZE,
+			 font:           STYLE.NORMAL_FONT,
+			 dim:            {x: .5, y:.77, w:.5,h:.22,},
+			 indent:         false,
+			 padding:        16,
+			 align: {v:CENTER, h:CENTER}
+			});
+		page.addParagraph(paragraph);
+
+		page.changeBackgroundImage(null);// FIXME: Use a background that looks like the cover of a book.
+
+		this.addNavigationElements(page, this.FRONT_PAGE_INDEX);
+
+		page.resize();
+	},
+
+	setupForwardPage(page)
+	{
+		// Create the Title Paragraph in centered font on the title page.
+		var fragment = [new Text_Fragment(this.content_manager.getForwardText(), STYLE.PROSE_CONSTANT)];
+		var paragraph = new Paragraph(
+			{text_fragments: fragment,
+			 text_size:      STYLE.NORMAL_SIZE,
+			 font:           STYLE.NORMAL_FONT,
+			 dim:            {x: .5, y:0, w:.5,h:1.0,},
+			 indent:         true,
+			 padding:        this.content_manager.getUnit(),
+			 align: {h:LEFT, v:CENTER}
+			});
+		page.addParagraph(paragraph);
+
+		page.changeBackgroundImage(null);// FIXME: Use a background that looks like the cover of a book.
+
+		this.addNavigationElements(page, this.FORWARD_PAGE_INDEX);
+
+		page.resize();
+	},
+
+	setupContentsPage(page)
+	{
+		// -- Table of Contents Title.
+		var fragment  = [new Text_Fragment("Table of Contents", STYLE.PROSE_CONSTANT)];
+		var paragraph = new Paragraph(
+			{text_fragments: fragment,
+			 text_size:      STYLE.TITLE_SIZE,
+			 font:           STYLE.TITLE_FONT,
+			 dim:            {x: 0, y:0, w:1.0,h:.33,},
+			 indent:         false,
+			 padding:        0,
+			 align: {v:CENTER, h:CENTER}
+			});
+		page.addParagraph(paragraph);
+
+		var THIS = this;
+		for(var i = this.min_page_index; i < this.max_page_index; i++)
+		{
+			var option = this._NEW_BUTTON();
+			var scope  = function(index){
+				option.setMouseAction(function(){
+					 THIS.gotoPage(index);
+					});
+			}; scope(i);
+			option.message = this.getPageName(i);
+			page.addContentsButton(option);
+		}
+
+		this.addNavigationElements(page, this.FORWARD_PAGE_INDEX);
+
+		page.changeBackgroundImage(null);// FIXME: Use a background that looks like the cover of a book.
+
+		page.resize();
+	},
+
+	// Setup the content for a normal story page.
+	setupStoryPage(page, index)
+	{
+
+		// We now load the page with all of its buttons.
+		var THIS = this;
+		
+		for(var i = 0; i < this.content_manager.numOptions(); i++)
+		{
+			var option = this._NEW_BUTTON();
+			var scope = function(index){
+				option.setMouseAction(function(){
+					 THIS.makeChoice(index);
+					});
+			}; scope(i);
+			page.addOptionButton(option);
+		}
+
+		this.addNavigationElements(page, index);
+
+		// Once we are done constructing the page, we populate it with content.
+		this.changePage(page, index);
+
+		page.resize();
+
+		//page.showOptionButtons();
+		page.hideOptionButtons();
+	},
+
+	addNavigationElements(page, index)
+	{
+		var left_button  = this._NEW_BUTTON();
+		var right_button = this._NEW_BUTTON();
+
+		left_button.message  = "<";
+		right_button.message = ">";
+
+		var THIS = this;
+		left_button .setMouseAction(function(){ THIS.prevPage(); console.log("Going to the previous page.");});
+		right_button.setMouseAction(function(){ THIS.nextPage(); console.log("Going to the next page.");});
+
+		// Add a previous button everywhere, except the front page.
+		if(index != this.FRONT_PAGE_INDEX)
+		{
+			page.addLeftButton (left_button);
+		}
+
+		page.addRightButton(right_button);
+	},
+
+	changePage(page, index)
+	{
+
+		var options_text = this.content_manager.getOptionsText(index);
+		page.changeAllOptionText(options_text);
+
+		this.changeImages(page, index);
+		this.changeProseText(page, index);		
+
+		// All pages start out in prose mode by default, so that the user may effectively read the prose.
+		//page.showOptionButtons();
+		page.hideOptionButtons();
+
+		page.resize();
+	},
+
+	changeProseText(page, index)
+	{
+		// Keep track of whether the option text has been inserted yet.
+		var option_inserted = false;
+
+		var fragments = [];
+
+		var prose = this.content_manager.getProseText(index);
+		var len = prose.length;
+		for(var i = 0; i < len; i++)
+		{
+			var str = prose[i];
+			// Insert option string inline.
+			if(str === "[]")
+			{
+				frag = new Text_Fragment(this.getChosenOptionString(index), STYLE.PROSE_VARIABLE);
+				frag.makeVariable();
+				fragments.push(frag);
+				option_inserted = true;
+			}
+			// Insert special option from page 7.
+			else if (str === "*")
+			{
+				var star_choice = this.choices[this.STAR_INDEX];
+				frag = new Text_Fragment(this.content_manager.getStoryMeal(star_choice), STYLE.PROSE_VARIABLE);
+				// We don't label this as variable to prevent the user from changing it anywhere besides page 7...
+				//frag.makeVariable();
+				fragments.push(frag);
+			}
+			else
+			{
+				frag = new Text_Fragment(str, STYLE.PROSE_CONSTANT);
+				fragments.push(frag);
+			}
+		}
+
+		if(!option_inserted)
+		{
+			var option_text = this.getChosenOptionString(index);
+			console.log(option_text);
+			if(option_text != null)
+			{
+				frag = new Text_Fragment(option_text, STYLE.PROSE_VARIABLE);
+				frag.makeVariable();
+				fragments.push(frag);
+			}
+		}
+
+		page.clearParagraphs();
+
+		var paragraph = new Paragraph(
+			{text_fragments: fragments,
+			 text_size:      STYLE.STORY_SIZE,
+			 font:           STYLE.STORY_FONT,
+			 dim:            {x: 0, y:0, w:.5,h: 1,},
+			 indent:         true,
+			 padding:        this.content_manager.getUnit(),
+			 align: {h:LEFT, v:TOP},
+			 end_string: ".",
+			});
+
+		page.addParagraph(paragraph);
+
+	},
+
+	getChosenOptionString(page_index)
+	{
+		var options_text  = this.content_manager.getOptionsText(page_index);
+
+		var chosen_option = this.choices[page_index];
+
+		// Not enough options exist for this choice.
+		if(options_text.length <= chosen_option)
+		{
+			return null;
+		}
+
+		var chosen_option_text = options_text[chosen_option];
+		return chosen_option_text;
+	},
+
+	getCurrentPage()
+	{
+		
+		// Return the storybook page if we are within the storybook page indices.
+		if(this.onStoryPage())
+		{
+			return this.page;
+		}
+
+		// special pages.
+		else if(this.current_page_index === this.FRONT_PAGE_INDEX)
+		{
+			return this.front_page;
+		}
+
+		else if(this.current_page_index === this.FORWARD_PAGE_INDEX)
+		{
+			return this.forward_page;
+		}
+
+		else if(this.current_page_index === this.TABLE_OF_CONTENTS_INDEX ||
+			    this.current_page_index === this.max_page_index)
+		{
+			return this.contents_page;
+		}
+	},
+
+	_NEW_BUTTON()
+	{
+		return new gui_Button(0, 0, 1, 1);
+	},
+
 	nextPage()
 	{
-		this.current_page = (this.current_page + 1) % this.numPages;
-		console.log("Flipping to next page: " + this.current_page);
-		redraw();
+		this.gotoPage(Math.min(this.current_page_index + 1, this.max_page_index));
 	},
 
 	prevPage()
 	{
-		this.current_page = (this.current_page + this.numPages - 1) % this.numPages;
-		console.log("FLipping to previous page: " + this.current_page);
+		this.gotoPage(Math.max(this.current_page_index - 1, this.min_page_index));
+	},
+	
+	//choice : integer, communicates the index of the choice that the user has made.
+	makeChoice(choice)
+	{
+		this.choices[this.current_page_index] = choice;
+		this.changeProseText(this.page, this.current_page_index);
+		this.page.hideOptionButtons();
+
+		this.changeImages(this.page, this.current_page_index);
+	},
+
+	allocateDefaultChoices()
+	{
+		// Set all choices to a default value of 0.
+
+		for(var i = 0; i < this.numPages; i++)
+		{
+			this.choices.push(0);
+		}
+	},
+
+	// This is the correct way for people to instruct this story to go to a new page.
+	gotoPage(index)
+	{
+		this.current_page_index = index;
+		if(this.onStoryPage())
+		{
+			this.changePage(this.page, index);
+		}
+
+		this.getCurrentPage().resize();
+
+		clear();
 		redraw();
 	},
-	
-	//number : integer, communicates a new choice to the story object.
-	makeChoice(number)
+
+	onStoryPage()
 	{
-		
+		return this.story_first_index <= this.current_page_index && this.current_page_index <= this.story_last_index;
 	},
 
-	getChoice()
+	getPageName(index)
 	{
-
+		if(index === this.FRONT_PAGE_INDEX)
+		{
+			return "Front Page";
+		}
+		else if (index === this.FORWARD_PAGE_INDEX)
+		{
+			return  "Forward Page";
+		}
+		else if (index === this.TABLE_OF_CONTENTS_INDEX)
+		{
+			return "Contents";
+		}
+		else
+		{
+			return "Page " + index;
+		}
 	},
 
-	setPageButtonContent()
+	changeImages(page, index)
 	{
-		// FIXME: Remove all of this hardcoded nonsense about buttons.
+		// FIXME: Remove this, it is just here for a stable build.
+		return;
 
-	var b_choice0 = this.buttons[0];
-	var b_choice1 = this.buttons[1];
-	var b_choice2 = this.buttons[2];
+		// -- Change the background to an appropriate image.
+		var backgrounds = this.content_manager.getBackgrounds(index);
 
-	b_choice0.world = this;
-	b_choice1.world = this;
-	b_choice2.world = this;
-	
-	b_choice0.setMouseAction(function()
-	{
-		this.world.choose0();
-	});
-	b_choice1.setMouseAction(function()
-	{
-		this.world.choose1();
-	});
-	b_choice2.setMouseAction(function()
-	{
-		this.world.choose2();
-	});
+		if(backgrounds === null)
+		{
+			page.changeBackgroundImage(this.content_manager.getDefaultBackgroundImage());
+			return;
+		}
 
-	b_choice0.message = "choice apple"
-	b_choice1.message = "choose bananna"
-	b_choice2.message = "choose cucumber"
-	
-	this.buttons.push(b_choice0);
-	this.buttons.push(b_choice1);
-	this.buttons.push(b_choice2);
+		var choice_index = this.choices[index];
 
-	this.left_button.message  = "<";
-	this.right_button.message = ">";
-	},
+		var background_name = backgrounds[choice_index];
 
-	mouseP()
-	{
-		
+		var sprite = this.content_manager.getSprite(background_name, 0, 0);
+
+		page.changeBackgroundImage(sprite);
 	}
+	
 }

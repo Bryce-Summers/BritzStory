@@ -22,7 +22,7 @@ Renderer.prototype =
 {
     clear()
     {
-        // global p5JS: clear();
+        // p5JS: clear();
         clear();
     }
 

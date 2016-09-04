@@ -1,4 +1,4 @@
-/* 
+/*
  * Button Class.
  * Written on 7/22/2015 by Bryce Summers
  * Works with P5JS.
@@ -19,6 +19,10 @@ function gui_Button(x, y, w, h)
 	this.message = "";
 	
 	this.alive = true;
+
+	this.background_color = 255;// White;
+
+	this._active = true;
 }
 
 gui_Button.prototype =
@@ -26,25 +30,31 @@ gui_Button.prototype =
 
 	update()
 	{
+		if(!this._active){ return; }
+
 		// Handle bogus releases.
 		if(buttonReleased)
 		{
 			buttonClickedOn = null;
 			buttonReleased = false;
 		}
-		
 	},
 	
 	draw()
 	{
-		fill(255);// White.
+		if(!this._active){ return; }
+
+		// Draw the background.
+		fill(this.background_color);// White.
+		stroke(0);// BLACK.
 		rect(this.x, this.y, this.w, this.h);
+
 	  
 		textSize(this.text_size);
 		fill(0);
 		textAlign(CENTER, CENTER);
-		text(this.message, this.x + this.w/2, this.y + this.h/2 + this.text_size/2);
-		
+		text(this.message, this.x + this.w/2, this.y + this.h/2);
+	
 		if(buttonClickedOn === this)
 		{
 			fill(0, 0, 0, 100);
@@ -63,12 +73,18 @@ gui_Button.prototype =
 		rect(this.x, this.y, this.w, this.h);
 	},
 
+	setTextSize(size)
+	{
+		this.text_size = size;
+	},
+
 	resize(x, y, w, h)
 	{
-		this.x = x;
-		this.y = y;
-		this.w = w;
-		this.h = h;
+
+		this.x  = x;
+		this.y  = y;
+		this.w  = w;
+		this.h  = h;
 		this.x2 = this.x + w;
 		this.y2 = this.y + h;
 	},
@@ -80,11 +96,20 @@ gui_Button.prototype =
 
 	setMouseAction(action)
 	{
+		if(!this._active){ return; }
+
 		this.action = action;
+	},
+
+	setBackgroundColor(color)
+	{
+		this.background_color = color;
 	},
   
 	mousePressed()
 	{
+		if(!this._active){ return; }
+
 		if(this.mouseIn())
 		{
 			buttonClickedOn = this;
@@ -93,6 +118,8 @@ gui_Button.prototype =
 	
 	mouseReleased()
 	{
+		if(!this._active){ return; }
+
 		if(this.mouseIn())
 		{
 			if(buttonClickedOn === this)
@@ -111,7 +138,6 @@ gui_Button.prototype =
 	// Returns true if the mouse is inside of this button.
 	mouseIn()
 	{
-
 		var output = 
 			this.x <= mouseX && mouseX <= this.x2 &&
 			this.y <= mouseY && mouseY <= this.y2;
@@ -124,4 +150,19 @@ gui_Button.prototype =
 	{
 		return !this.alive;
 	},
+
+	deactivate()
+	{
+		this._active = false;
+	},
+
+	activate()
+	{
+		this._active = true;
+	},
+
+	isActive()
+	{
+		return this._active;
+	}
 }
