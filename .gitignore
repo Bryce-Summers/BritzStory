@@ -1,5 +1,5 @@
-# Image files
-*.png
+# Note: I have been given permission to host the images online, wahoo!
+# Therefor I no longer need to ignore .png files.
 
 # Windows image file caches
 Thumbs.db
