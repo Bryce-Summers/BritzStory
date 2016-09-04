@@ -421,7 +421,9 @@ Story.prototype =
 		}
 		else
 		{
-			return "Page " + index;
+			// Here we perform a conversion between array page names,
+			// and page names as expected of a non programmer out in the real world of children's fiction.
+			return "Page " + (index + 1);
 		}
 	},
 
