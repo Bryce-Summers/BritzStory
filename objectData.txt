@@ -1,0 +1,5 @@
+4  // Room 0, 4 options for the character.
+143 // Golilocks face.
+142 // Blue Bright Eyes.
+100 // Purple Dimples.
+G3  // Greengigglysticks.

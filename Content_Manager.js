@@ -28,21 +28,30 @@
                       "or met up with skipping snakes.  Or imagine other characters who explore new adventures. " + 
                       "In this interactive book, children can select their favorite magical moments and create their own storybook.";
 
-    this.DEFAULT_BACKGROUND_NAME = "AAA_BACKGROUND_NOT_FOUND";
+    // The defaults used to measure scalings.
+    this.DEFAULT_BACKGROUND_NAME = "B";
+    this.DEFAULT_SPRITE_NAME     = "000AAA_SPRITE_NOT_FOUND";
+
+    this.NOT_FOUND_BACKGROUND_NAME = "B";
+    this.NOT_FOUND_SPRITE_NAME     = "000AAA_SPRITE_NOT_FOUND";
 
     this.not_found_background = null;
     this.not_found_sprite = null;
 
-    this._backgroundNames = [];
+    this._backgroundNames   = [];
+    this._objectData_gold   = []; // Specifies the possible object locations.
+    this._objectData_blue   = []; // Specifies the possible object locations.
+    this._objectData_purple = []; // Specifies the possible object locations.
+    this._objectData_green  = []; // Specifies the possible object locations.
  }
 
  Content_Manager.prototype =
  {
-    // Placeholder / Error images. These won't bee needed once all of the images have been illustrated and integrated into this program.
+    // Placeholder / Error images. These won't be needed once all of the images have been illustrated and integrated into this program.
     load_not_found_sprites()
     {
-        this.not_found_background = this.getSprite("AAA_BACKGROUND_NOT_FOUND", 0, 0);
-        this.not_found_sprite     = this.getSprite("AAA_SPRITE_NOT_FOUND", 0, 0);
+        this.not_found_background = this.getSprite(this.NOT_FOUND_BACKGROUND_NAME, 0, 0);
+        this.not_found_sprite     = this.getSprite(this.NOT_FOUND_SPRITE_NAME, 0, 0);
     },
 
     numPages()
@@ -78,6 +87,7 @@
         this.load_not_found_sprites();
         this.loadWords();
         this.loadBackgroundNames();
+        this.loadObjectData();
     },
 
     getDefaultBackgroundImage()
@@ -93,8 +103,13 @@
     // This may be used for both background and sprites.
     // FIXME: Handle cases where the user wants the same image at different locations.
     // ASSUMES for the sake of providing default images, that x and y will be 0 for backgrounds.
-    getSprite(name, x, y)
+    getSprite(name, x, y, scale)
     {
+
+        if(scale === undefined)
+        {
+            scale = 1.0;
+        }
 
         var isBackground = x === 0 && y === 0;
 
@@ -102,10 +117,10 @@
         {
             if(isBackground)
             {
-                return new Sprite(this.not_found_background, x, y);
+                return new Sprite(this.not_found_background, x, y, scale);
             }
 
-            return new Sprite(this.not_found_sprite, x, y);
+            return new Sprite(this.not_found_sprite, x, y, scale);
         }
 
         // Look up this sprite from the dictionary.
@@ -114,7 +129,7 @@
         if(!sprite)
         {
             var default_image = this.not_found_background != null ? this.not_found_background.image : null;
-            sprite = new Sprite(default_image, x, y);
+            sprite = new Sprite(default_image, x, y, scale);
             sprite.setName(name);
             this.sprites[name] = sprite;
 
@@ -171,77 +186,95 @@
         
         // Page 0.
         s.push(["Once upon a time, there was a girl named"]);
-        o.push(["Goldilocks", "Bluebrightlyeyes", "Purpledimples", "Greengiggleysticks"]);// 1.
-        
+        o.push(["Goldilocks", "Bluebrightlyeyes", "Purpledimples", "Greengiggleysticks"]);
+        this.CHOICE_CHARACTER = 0;
+
         // Page 1.
-        s.push(["She woke up one morning and put on her"])
-        o.push(["doodle dress", "jazzy jeans and floppy t-shirt", "princess gown", "space suit"]);// 2.
+        s.push(["She woke up one morning and put on her"]);
+        o.push(["doodle dress", "jazzy jeans and floppy t-shirt", "princess gown", "space suit"]);
+        this.CHOICE_CLOTHING = 1;
         
         // Page 2.
-        s.push(["Then, she went for a walk"])
+        s.push(["Then, she went for a walk"]);
         o.push(["in the Stamperdamper woods", "on a street in Dippytown", "on Puddleduddle beach", "in the Dillysilly orchard"]);
-        
+        this.CHOICE_WALK_LOCATION = 2;4
+
         // Page 3.
         s.push(["She walked by"]);
         o.push(["dancing daisies", "jumping jack o-lanterns", "twinkling trees", "bouncing bikes"]);
-        
+        this.CHOICE_WALKED_BYE = 3;
+
         // Page 4.
         s.push(["She stopped to play with"]);
         o.push(["skipping snakes", "biking bees", "munching monkeys", "kissing kangaroos"]);
+        this.CHOICE_STOPPED_AND_PLAYED_WITH = 4;
         
         // Page 5.
         s.push(["Very soon, she became hungry so she stopped at the"]);
         o.push(["house of the 3 bears", "castle of the fairy princesses", "cottage of the dwarfs", "palace of the King and Queen"]);
-        
+        this.CHOICE_HOUSING_LOCATION = 5;
+
         // Page 6.
         // NOTE: This choice represents the evaluation of "*".
         s.push(["No one was there so she went inside to look around when she saw on a table"]);
-        o.push(["3 bowls of lumpywumpy porridge", "3 dishes of tootsie wootsie sauce", "3 plates of cherry berry pudding", "3 cups of scoop loop yogurt"]);
-        
+        o.push(["3 bowls of lumpywumpy porridge", "3 dishes of tootsie wootsie sauce", "3 plates of cherry berry pudding", "3 cups of scoop loop yogurt"]);// 7.
+        this.CHOICE_THREE_MEALS = 6;
+
         // Page 7.
         s.push(["She decided to try the biggest", "*", "but it was too"]);
         // FIXME : Integrate context sensitive labels.
         // FIXME : Use the previous choice from page 7...
-        o.push(["hot", "spicy", "sweet", "lumpy"]);
-        
+        o.push(["hot", "spicy", "sweet", "lumpy"]);// 8.
+        this.CHOICE_BIG_ADJ = 7;
+
         // Story: but it was too hot.
         
         // Page 8.
         s.push(["She then tried the middle-size", "*", "but it was too"]);
-        o.push(["cold", "sticky", "smelly", "sour"]);
+        o.push(["cold", "sticky", "smelly", "sour"]);// 9.
+        this.CHOICE_MIDDLE_ADJ = 8;
         
         // Page 9.
         s.push(["The third ", "*", "was just right and she ate it all up"]);
         // NOTE: There are no options for this page.
         o.push([]);
+        this.CHOICE_SMALL_ADJ = 9;
         
         // Page 10.
         s.push(["Then, she saw some stuffed animals to play with. She really liked the"]);
         o.push(["orange crocodile with pink feathers", "blue monkey with gold wings", "green dog with white horns", "zebra with a red tail"]);
-        
+        this.CHOICE_ANIMAL_PLAY = 10;
+
         // Page 11.
         s.push(["After awhile, she became very sleepy and decided to lie down for a nap. She quickly fell asleep and had a wonderful dream about"]);
-        o.push(["dancing with butterflies", "swimming with a school of fishes", "floating on clouds with birds", "swinging with monkeys"]);
+        o.push(["dancing with butterflies", "swimming with a school of fishes", "floating on clouds with birds", "swinging with monkeys"]); // 12.
+        this.CHOICE_DREAM_ABOUT_ANIMAL = 11;
         
         // Page 12.
         s.push(["When she woke up, she saw the"]);
         // NOTE: I believe that these might be dependant on some earlier choices.
-        o.push(["bears back from the woods", "dwarfs playing cards", "the King and Queen dancing", "the fairy princesses stiring up a magic brew for her"]);
-        
+        o.push(["bears back from the woods", "dwarfs playing cards", "the King and Queen dancing", "the fairy princesses stiring up a magic brew for her"]); // 13.
+        this.CHOICE_HOMECOMING_CHARACTERS = 12;
+
+
         // Page 13.
-        s.push(["They she said"]);
+        s.push(["They said"]);
         // NOTE: In my verse parsing code, I will need to special case lines
         //  that end in a quotation to avoid automatically inserting a period at the end.
         o.push(["\"Welcome to our home.\"", "\"Get out of our house and never come back.\"", "\"Would you like to stay and play with us?\"", "\"You better go home because your parents may be looking for you.\""]);
-        
+        // 14 choice index.
+        this.CHOICE_SPEECH_SAID = 13;
+
         // Page 14.
         s.push(["After awhile, she left"]);
-        o.push(["on a magic carpet", "in a flying machine", "on the back of a unicorn", "in a batmobile"]);
-        
+        o.push(["on a magic carpet", "in a flying machine", "on the back of a unicorn", "in a batmobile"]); // 15
+        this.CHOICE_TRANSPORTATION = 14;
+
         // Page 15.
         // NOTE: "[]" indicates to use the option text inline, instead of as a suffix.
         s.push(["Then, she was ready to", "[]", "and have a wonderful rest of the day."]);
-        o.push(["go home", "go to school", "play with her friends at the playground", "go to the park"]);
+        o.push(["go home", "go to school", "play with her friends at the playground", "go to the park"]); // 16
+        this.CHOICE_AFTERWARDS = 15;
 
     },
 
@@ -251,7 +284,7 @@
         var I = this._backgroundNames;
 
         // Page 0.
-        I.push(null);
+        I.push(["Blank"]);// Choose the character?
 
         // Page 1.
         I.push(["A"]);
@@ -280,14 +313,18 @@
         // Page 8.
         I.push(["Q", "R", "S", "T", "Z", "AA", "BB", "CC"]);
 
-        // Page 9.
-        I.push(["DD", "DD1", "DD2", "DD3"]);
+        // Page 9. Character smiling after eating meal.
+        I.push(null);//["DD", "DD1", "DD2", "DD3"]);
 
         // Page 10.
         I.push(["EE", "FF", "GG", "HH"]);
 
         // Page 11. Notice that their is a special 5th case here.
-        I.push(["EE", "FF", "GG", "HH", "JJ"]);
+        // Dancing with buterflies,
+        // swimming with a school of fishes,
+        // floating on clouds with birds,
+        // swinging with monkeys.
+        I.push(["81", "85", "86", "??", "JJ"]);
 
         // Page 12.
         I.push(["L", "M", "N", "P"]);
@@ -299,8 +336,130 @@
         I.push(["G", "H", "J", "K"]);
 
         // Page 15.
-        I.push(["KK", "LL", "MM", "NN"]);
+        I.push(["HH", "JJ", "KK", "LL"]);
 
+    },
+
+    // Loads all of the data necessary for drawing the objects on the screen.
+    loadObjectData()
+    {
+        this._objectData_gold   = []; // Specifies the possible object locations.
+        this._objectData_blue   = []; // Specifies the possible object locations.
+        this._objectData_purple = []; // Specifies the possible object locations.
+        this._objectData_green  = []; // Specifies the possible object locations.
+
+
+        this.loadGold();
+        this.loadBlue();
+        this.loadPurple();
+        this.loadGreen();
+    },
+
+    loadGold()
+    {
+        var O = this._objectData_gold;
+
+        // Pat's Page number 1. Draws one of the given named character face objects based on the choice at the given index.
+
+        // choice_index indicates scale and name.
+        // scale_choice_index indicates scale.
+        // name_choice_index indicates name.
+
+        // My objective right now is to create an easy to write and use data structure that encodes all of the combinations.
+
+        var page = [{name: "C5", scale:1}]; // Head.
+        O.push(page);
+
+        // Pat's page number 2.
+        var page = [{index:this.CHOICE_CLOTHING, name:
+                        [
+                            {name:"1", scale:.42},
+                            {name:"2", scale:.42},
+                            {name:"3", scale:.42},
+                            {name:"4", scale:.42},
+                        ]},
+
+                        {name:"DD3", scale:.42}
+                    ];
+        O.push(page);
+
+        // Pat's page number 3.
+        var page = [{index:this.CHOICE_WALK_LOCATION, name:
+                         [{index:this.CHOICE_CLOTHING, name:
+                            [
+                                {name:"5", scale: .42},
+                                [{name:"6", scale: .42}, {name:"C6", scale: .42}],
+                                {name:"7", scale: .42},
+                                [{name:"8", scale: .42}, {name:"C6", scale: .42}]
+                            ]},
+                          {index:this.CHOICE_CLOTHING, name:
+                            [
+                                {name:"5", scale:  .24},
+                                [{name:"6", scale: .24}, {name:"C6", scale: .21}],
+                                {name:"7", scale:  .24},
+                                [{name:"8", scale: .24}, {name:"C6", scale: .21}]
+                            ]},
+                          {index:this.CHOICE_CLOTHING, name:
+                            [
+                                {name:"5", scale:  .42},
+                                [{name:"6", scale: .42}, {name:"C6", scale: .42}],
+                                {name:"7", scale:  .42},
+                                [{name:"8", scale: .42}, {name:"C6", scale: .42    }]
+                            ]},
+                          {index:this.CHOICE_CLOTHING, name:
+                            [
+                                {name:"5", scale:  .42},
+                                [{name:"6", scale: .42}, {name:"C6", scale: .42}],
+                                {name:"7", scale:  .42},
+                                [{name:"8", scale: .42}, {name:"C6", scale: .42}]
+                            ]},
+                         ]}
+                    ];
+        O.push(page);
+
+        // 4. This one is a monster.
+        var page =
+            [{index:this.CHOICE_WALKED_BYE, name:
+                [{index:this.CHOICE_WALK_LOCATION, name:
+                    [{index:this.CHOICE_CLOTHING, name:
+                        [
+                            [{name:"5", scale: .40}, {name:"9", scale: .45}],
+                            [{name:"6", scale: .46}, {name:"C6", scale: .40}, {name:"9", scale: .45}],
+                            [{name:"7", scale: .40}, {name:"9", scale: .45}],
+                            [{name:"8", scale: .40}, {name:"C6", scale: .40}, {name:"9", scale: .45}]
+                        ]},
+                     {index:this.CHOICE_CLOTHING, name:
+                        [
+                            [{name:"5", scale: .40}, {name:"9", scale: .45}],
+                            [{name:"6", scale: .46}, {name:"C6", scale: .40}, {name:"9", scale: .45}],
+                            [{name:"7", scale: .40}, {name:"9", scale: .45}],
+                            [{name:"8", scale: .40}, {name:"C6", scale: .40}, {name:"9", scale: .45}]
+                        ]},
+                    ]}
+                ]}
+            ];
+        O.push(page);
+
+        for(var i = 0; i < 20; i++)
+        {
+            var page = [{name: "C5", scale:1}]; // Head.
+            O.push(page);
+        }
+    },
+
+    loadBlue()
+    {
+        var O = this._objectData_blue;
+    },
+
+    loadPurple()
+    {
+        var O = this._objectData_purple;
+    },
+
+    loadGreen()
+    {
+        var O = this._objectData_green;
     },
 
     NEW_EMPTY_SPRITE(x, y, name)
@@ -335,7 +494,7 @@
 
     getRawBackgroundHeight()
     {
-        var sprite = this.sprites[this.DEFAULT_BACKGROUND_NAME];
+        var sprite = this.getSprite(this.DEFAULT_BACKGROUND_NAME);
         if(sprite)
         {
             return sprite.image.height;
@@ -347,7 +506,7 @@
 
     getRawBackgroundWidth()
     {
-        var sprite = this.sprites[this.DEFAULT_BACKGROUND_NAME];
+        var sprite = this.getSprite(this.DEFAULT_BACKGROUND_NAME);
         if(sprite)
         {
             return sprite.image.width;
@@ -374,5 +533,28 @@
     getBackgrounds(index)
     {
         return this._backgroundNames[index];
+    },
+
+    // All non background images, including characters.
+    // Returns the set of objects for the current page.
+    getObjects(index, character_index)
+    {
+
+        if(character_index === 0)
+        {
+            return this._objectData_gold[index];
+        }
+        else if(character_index === 1)
+        {
+            return this._objectData_blue[index];
+        }
+        else if(character_index === 2)
+        {
+            return this._objectData_purple[index];
+        }
+        else if(character_index === 3)
+        {
+            return this._objectData_green[index];
+        }
     }
  }

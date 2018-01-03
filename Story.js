@@ -100,7 +100,7 @@ Story.prototype =
 		page.addParagraph(paragraph);
 
 		// Code and Design.
-		var fragment = [new Text_Fragment("Code and Design: Bryce Summers", STYLE.PROSE_CONSTANT)];
+		var fragment = [new Text_Fragment("Programming: Bryce Summers", STYLE.PROSE_CONSTANT)];
 		var paragraph = new Paragraph(
 			{text_fragments: fragment,
 			 text_size:      STYLE.NORMAL_SIZE,
@@ -226,9 +226,10 @@ Story.prototype =
 		page.addRightButton(right_button);
 	},
 
+    // Goes to the given page.
 	changePage(page, index)
 	{
-
+        console.log(index);
 		var options_text = this.content_manager.getOptionsText(index);
 		page.changeAllOptionText(options_text);
 
@@ -427,71 +428,142 @@ Story.prototype =
 		}
 	},
 
+    // Changes the images for the page at the given index, 
+    // base on the current set of choices.
 	changeImages(page, index)
 	{
 
-		// -- Change the background to an appropriate image.
-		var backgrounds = this.content_manager.getBackgrounds(index);
+        this.changeImagesBackground(page, index);
+        this.changeImagesObjects(page, index);
+	},
 
-		if(backgrounds === null)
-		{
-			page.changeBackgroundImage(this.content_manager.getDefaultBackgroundImage());
-			return;
-		}
+    changeImagesBackground(page, index)
+    {
+                // -- Change the background to an appropriate image.
+        var backgrounds = this.content_manager.getBackgrounds(index);
 
-		var choice_index = this.choices[index];
-		
-		// Here we associate logic with each of the pages.
-		switch(this.current_page_index)
-		{
-			case 0: break; // Character Selection.
-			case 1: choice_index = 0; // Constant Background.
-				break;
-			case 3: choice_index = this.choices[2];
-				break;
-			case 4: choice_index = this.choices[2];
-				break;
+        if(backgrounds === null)
+        {
+            page.changeBackgroundImage(this.content_manager.getDefaultBackgroundImage());
+            return;
+        }
 
-			case 5: break; // Bear's, troll's etc house choice.
+        var choice_index = this.choices[index];
+        
+        // Here we associate logic with each of the pages.
+        switch(this.current_page_index)
+        {
+            case 0: break; // Character Selection.
+            case 1: choice_index = 0; // Constant Background.
+                break;
+            case 3: choice_index = this.choices[2];
+                break;
+            case 4: choice_index = this.choices[2];
+                break;
 
-			case 6: choice_index = this.choices[5];
-				break;
-			// FIXME: Add special casing logic here.
-			case 7:
-				break;
-			case 8:
-				break;
-			// Picture of character smiling, based on character chosen.
-			case 9: choice_index = this.choices[0];
-				break;
+            case 5: break; // Bear's, troll's etc house choice.
 
-			case 10: choice_index = this.choices[5];
-				break;
+            case 6: choice_index = this.choices[5];
+                break;
+            // FIXME: Add special casing logic here.
+            case 7:
+                break;
+            case 8:
+                break;
+            // Picture of character smiling, based on character chosen.
+            case 9: choice_index = this.choices[0];
+                break;
 
-			case 11: choice_index = this.choices[5];
-				break;
+            case 10: choice_index = this.choices[5];
+                break;
 
-			case 12: choice_index = this.choices[5];
-				break;
+            case 11: choice_index = this.choices[11];
+                break;
 
-			case 13: choice_index = this.choices[5];
-				break;
+            case 12: choice_index = this.choices[5];
+                break;
 
-			case 14: choice_index = this.choices[5];
-				break;
-		}
+            case 13: choice_index = this.choices[5];
+                break;
 
-		var background_name = backgrounds[choice_index];
+            case 14: choice_index = this.choices[5];
+                break;
+        }
 
-		if(!background_name)
-		{
-			console.log("Invalid Background Logic for page " + index);
-			debugger;
-		}
+        var background_name = backgrounds[choice_index];
 
-		var sprite = this.content_manager.getSprite(background_name, 0, 0);
+        if(!background_name)
+        {
+            console.log("Invalid Background Logic for page " + index);
+            debugger;
+        }
 
-		page.changeBackgroundImage(sprite);
-	}
-	
+        var sprite = this.content_manager.getSprite(background_name, 0, 0);
+
+        page.changeBackgroundImage(sprite);
+    },
+
+    changeImagesObjects(page, index)
+    {
+        // Now change the objects on the page.
+
+        // Clear objects from the page.
+        page.clearObjectSprites();
+
+        // Add all intended objects to the page.
+        var object_specs = this.content_manager.getObjects(index, this.choices[0]);
+        var len = object_specs.length;
+
+        // Go through each image layer.
+        for(var i = 0; i < len; i++)
+        {
+            var spec = object_specs[i];
+
+            var x;
+            var y;
+
+            // While we have not found a leaf image.
+            // proceed to go down deeper.
+            while(!Array.isArray(spec) && spec.index)
+            {
+                var choice_index = spec.index;
+                var choice = this.choices[choice_index];
+                spec = spec.name[choice];
+            }
+
+            if(!Array.isArray(spec))
+            {
+                spec = [spec];
+            }
+
+            for(var i2 = 0; i2 < spec.length; i2++)
+            {
+                x = 0;
+                y = 0 + 50*i2;
+
+                scale = spec[i2].scale;
+                sprite_name = spec[i2].name;
+
+                // go down to deeper sub specifications. A given
+                // image might depend on multiple choices.
+                //while(sprite_name instanceof )
+
+                // If the name is empty there, then don't draw anything.
+                if(sprite_name.length < 1)
+                {
+                    continue;
+                }
+
+                var sprite = this.content_manager.getSprite(sprite_name, x, y, scale);
+                
+                // Ensure that the position and scaling values are updated.
+                sprite.x = x;
+                sprite.y = y;
+                sprite.scale = scale;
+                page.addObjectSprite(sprite);
+            }
+
+            page.setPageIndex(index);
+        }
+    }
 }

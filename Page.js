@@ -67,6 +67,9 @@ function Page(content_manager)
 
 	// Performs the initial resizing and sizing of buttons.
 	this._resize(true);
+
+    // used for debugging display.
+    this.page_index = -1;
  }
 
 Page.prototype =
@@ -76,7 +79,6 @@ Page.prototype =
 	// FIXME: Abstract the functionality of renderer's so that they are interchangable.
 	draw()
 	{
-
 		var w, h, x;
 		w = this._getScaledBackgroundW();
 		h = this._getScaledBackgroundH();
@@ -113,7 +115,14 @@ Page.prototype =
 		var len = this.sprites.length;
 		for(var i = 0; i < len; i++)
 		{
-			this.sprites[i].draw();
+            // Draw sprites scaled appropriately on the page.
+            var spr = this.sprites[i];
+            var img = spr.image;
+            var sx = x + spr.x*this.scale;
+            var sy = y + spr.y*this.scale;
+            var width  = img.width*this.scale*spr.scale;
+            var height = img.height*this.scale*spr.scale;
+            image(img, sx, sy, width, height);
 		}
 
 		var len = this._buttons.length;
@@ -134,6 +143,9 @@ Page.prototype =
 				this.render_paragraph(this.paragraphs[i]);
 			}
 		}
+
+        textSize(20);
+        text(this.page_index, 50, 0);        
 
 	},
 
@@ -760,5 +772,21 @@ Page.prototype =
 		output.h = h;
 
 		return output;
-	}
+	},
+
+    clearObjectSprites()
+    {
+        this.sprites = [];
+    },
+
+    addObjectSprite(sprite)
+    {
+        this.sprites.push(sprite);
+    },
+
+    // Used for debugging.
+    setPageIndex(index)
+    {
+        this.page_index = index;
+    }
 }

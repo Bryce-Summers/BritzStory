@@ -30,3 +30,6 @@ This section has been deliberatly left blank.
  - Some of the longer option texts overflow the option buttons horizontally, which is a bug.
  - All of the objects and background need to be better integrated.
  - I need to finish logically associating choices to collections of background and object names.
+
+
+ Notes: It would be helpful to me if everything was oriented rightside up, with whitespace already removed.
