@@ -181,7 +181,7 @@
         
         // The story comes from the "Imaginative Concepts description by Path Britz.
         // The title
-        var title = "The I don't think so story of Goldilocks and the three bears";
+        var title = "Imaginative Concepts";
         var alternate_title = "Fairy Tales Can Come True";
         
         // Page 0.
@@ -197,16 +197,16 @@
         // Page 2.
         s.push(["Then, she went for a walk"]);
         o.push(["in the Stamperdamper woods", "on a street in Dippytown", "on Puddleduddle beach", "in the Dillysilly orchard"]);
-        this.CHOICE_WALK_LOCATION = 2;4
+        this.CHOICE_WALK_LOCATION = 2;
 
         // Page 3.
         s.push(["She walked by"]);
-        o.push(["dancing daisies", "jumping jack o-lanterns", "twinkling trees", "bouncing bikes"]);
+        o.push(["dancing daisies", "jumping jack o-lanterns", "skating seals", "bouncing bikes"]);
         this.CHOICE_WALKED_BYE = 3;
 
         // Page 4.
         s.push(["She stopped to play with"]);
-        o.push(["skipping snakes", "biking bees", "munching monkeys", "kissing kangaroos"]);
+        o.push(["skipping snakes", "biking bees", "munching monkeys", "waltzing wallabees"]);
         this.CHOICE_STOPPED_AND_PLAYED_WITH = 4;
         
         // Page 5.
@@ -217,7 +217,7 @@
         // Page 6.
         // NOTE: This choice represents the evaluation of "*".
         s.push(["No one was there so she went inside to look around when she saw on a table"]);
-        o.push(["3 bowls of lumpywumpy porridge", "3 dishes of tootsie wootsie sauce", "3 plates of cherry berry pudding", "3 cups of scoop loop yogurt"]);// 7.
+        o.push(["3 bowls of lumpy wumpy porridge", "3 cups of tootsie wootsie sauce", "3 pestles of cherry berry pudding", "3cups of scoop loop yogurt"]);// 7.
         this.CHOICE_THREE_MEALS = 6;
 
         // Page 7.
@@ -267,13 +267,13 @@
 
         // Page 14.
         s.push(["After awhile, she left"]);
-        o.push(["on a magic carpet", "in a flying machine", "on the back of a unicorn", "in a batmobile"]); // 15
+        o.push(["on a magic carpet", "in a flying machine", "on the back of a unicorn", "in a batmobile"]); // 15.
         this.CHOICE_TRANSPORTATION = 14;
 
         // Page 15.
         // NOTE: "[]" indicates to use the option text inline, instead of as a suffix.
         s.push(["Then, she was ready to", "[]", "and have a wonderful rest of the day."]);
-        o.push(["go home", "go to school", "play with her friends at the playground", "go to the park"]); // 16
+        o.push(["go home", "go to school", "play with her friends at the playground", "go to the park"]); // 16.
         this.CHOICE_AFTERWARDS = 15;
 
     },
